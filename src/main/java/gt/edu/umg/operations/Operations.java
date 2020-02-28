@@ -7,8 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 /**
@@ -25,6 +23,13 @@ public class Operations {
     Connection connection = null;
     PreparedStatement statement = null;
     ResultSet result = null;
+    
+     public Operations() {
+    }
+    public Operations( Connection con ) {
+        this.connection = con;
+    } 
+    
      
     /**
      * Funcion que inserta a la base de datos
@@ -35,7 +40,7 @@ public class Operations {
     public int insertData(Persona persona) throws SQLException {
          int count = 0;
          try {
-             connection = Connect.getConnection();
+             connection = this.connection != null ? this.connection : Connect.getConnection();
              statement = connection.prepareStatement(INSERT);
              
              statement.setInt(1, persona.getId_student());
@@ -44,11 +49,11 @@ public class Operations {
              
              count = statement.executeUpdate();             
              
-         } catch (SQLException ex) {
-             Logger.getLogger(Operations.class.getName()).log(Level.SEVERE, null, ex);
          }finally{
              Connect.closePreparedStatement(statement);
-             Connect.closeConnection(connection);
+             if(this.connection == null) {
+                 Connect.closeConnection(connection);
+             }
              return count;
          }
      }
@@ -64,7 +69,7 @@ public class Operations {
     public int updateData( int id, String nombre, String apellido) throws SQLException {
         int count = 0;
          try {
-             connection = Connect.getConnection();
+             connection = this.connection != null ? this.connection : Connect.getConnection();
              statement = connection.prepareStatement(UPDATE);
              
              statement.setString(1, nombre);
@@ -73,11 +78,11 @@ public class Operations {
              
              count = statement.executeUpdate();
              
-         } catch (SQLException ex) {
-             Logger.getLogger(Operations.class.getName()).log(Level.SEVERE, null, ex);
          }finally {
              Connect.closePreparedStatement(statement);
-             Connect.closeConnection(connection);
+             if(this.connection == null) {
+                 Connect.closeConnection(connection);
+             }
          }
          
          return count;
@@ -92,18 +97,18 @@ public class Operations {
     public int deleteData( int id ) throws SQLException {
         int count = 0;
          try {
-             connection = Connect.getConnection();
+             connection = this.connection != null ? this.connection : Connect.getConnection();
              statement = connection.prepareStatement(DELETE);
              
              statement.setInt(1, id);
              
              count = statement.executeUpdate();
              
-         } catch (SQLException ex) {
-             Logger.getLogger(Operations.class.getName()).log(Level.SEVERE, null, ex);
          }finally {
              Connect.closePreparedStatement(statement);
-             Connect.closeConnection(connection);
+             if( this.connection == null ) {
+                 Connect.closeConnection(connection);
+             }
          }
          return count;
     }
@@ -117,7 +122,7 @@ public class Operations {
         ArrayList<Persona> registros = new ArrayList<>();
         Persona persona = null;
          try {
-             connection = Connect.getConnection();
+             connection = this.connection != null ? this.connection : Connect.getConnection();
              statement = connection.prepareStatement(SELECT);
              result = statement.executeQuery();
              
@@ -125,12 +130,12 @@ public class Operations {
                  persona = new Persona(result.getInt(1), result.getString(2), result.getString(3));
                  registros.add(persona);
              }
-         } catch (SQLException ex) {
-             Logger.getLogger(Operations.class.getName()).log(Level.SEVERE, null, ex);
          }finally {
              Connect.closeResultSet(result);
              Connect.closePreparedStatement(statement);
-             Connect.closeConnection(connection);
+             if(this.connection == null) {
+                 Connect.closeConnection(connection);
+             }
          }
          return registros;
     }

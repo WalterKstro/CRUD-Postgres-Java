@@ -1,9 +1,11 @@
 package gt.edu.umg.main;
 
+import gt.edu.umg.connect.Connect;
 import gt.edu.umg.maping.Persona;
 import gt.edu.umg.operations.Operations;
+import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
+
 
 /**
  *
@@ -11,17 +13,28 @@ import java.util.ArrayList;
  */
 public class Main {
     public static void main(String[] args) throws SQLException {
-        Operations opt = new Operations();
-        //Persona p1 = new Persona(3,"Astrid","Luquez");
-        ArrayList<Persona> listado = opt.selectData();
         
-        for (Persona persona : listado) {
-            System.out.println(persona.toString());
+        Connection con = Connect.getConnection();
+        
+        if( con.getAutoCommit()) {
+            con.setAutoCommit(false);
         }
+        Operations opt = new Operations(con);
         
-        //opt.insertData(p1);
-        //opt.updateData(3, "Astrid", "Castro");
-        //opt.deleteData(3);
+        try{
+            opt.updateData(3, "Gabriela", "Luquez");
+            opt.insertData(new Persona(4, "Diego", "Antonio"));
+        
+           con.commit();
+        }catch(SQLException e){
+            try{
+                e.printStackTrace();
+                con.rollback();
+                System.out.println("Realizando Callback a las transacciones");
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }
         
     }
 }
